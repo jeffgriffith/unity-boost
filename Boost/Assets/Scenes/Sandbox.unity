@@ -279,6 +279,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 64099a3cd95201e4a85e44bb5a87dad9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fuelBurnRate: 0.1
+  fuelLevel: 100
   thrustRate: 1000
   rotationRate: 20
 --- !u!54 &188620354

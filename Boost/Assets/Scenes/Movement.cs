@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
+
 using UnityEngine;
 
 public class Movement : MonoBehaviour
@@ -8,7 +10,8 @@ public class Movement : MonoBehaviour
     Material m;
 
     AudioSource audioSource;
-    float fuelBurnRate = 0f;
+    public float fuelBurnRate = 0.01f;
+    public float fuelLevel = 100f;
 
     [SerializeReference] float thrustRate = 1000f;
     [SerializeReference] float rotationRate = 20f;
@@ -39,19 +42,16 @@ public class Movement : MonoBehaviour
         AdjustSound(thrusting);
 
         if (thrusting) {
-            bool fuelRemaining = AdjustForFuel();
-            if (fuelRemaining)
+            AdjustForFuel();
+            if (!OutOfFuel())
                 rb.AddRelativeForce(Vector3.up * thrustRate * Time.deltaTime);
         }
     }
 
     void AdjustSound(bool thrusting) {
-        if (audioSource == null) {
-            Debug.Log("OOPS NO AUDIO SOURCE TO ADJUST");
-            return;
-        }
+        bool playSound = thrusting && !OutOfFuel();
 
-        if (thrusting) {
+        if (playSound) {
             if (!audioSource.isPlaying) {
                 audioSource.Play();
             }
@@ -60,20 +60,11 @@ public class Movement : MonoBehaviour
         }
     } 
 
-    bool AdjustForFuel() {
-        bool hasRemainingFuel = true;
-
-        Vector3 scale = transform.localScale;
-        float newY = scale.y;
-        newY -= fuelBurnRate;
-        if (newY > 0.25f) {
-            Vector3 newScale = new Vector3(scale.x, newY, scale.z);
-            transform.localScale = newScale;
-        } else {
-            hasRemainingFuel = false;
+    void AdjustForFuel() {
+        fuelLevel = Math.Max(0f, fuelLevel - fuelBurnRate);
+        if (OutOfFuel()) {
             m.color = Color.red;
         }
-        return hasRemainingFuel;
     }
 
     void ApplyRotation() {
@@ -89,5 +80,9 @@ public class Movement : MonoBehaviour
         rb.freezeRotation = true; // Freeze physics rotation so that we can do it manually.
         transform.Rotate(rotationRate * Vector3.forward * Time.deltaTime);
         rb.freezeRotation = false;
+    }
+
+    bool OutOfFuel() {
+        return fuelLevel == 0f;
     }
 }
