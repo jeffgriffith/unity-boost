@@ -8,6 +8,7 @@ public class Movement : MonoBehaviour
     Material m;
 
     AudioSource audioSource;
+    float fuelBurnRate = 0f;
 
     [SerializeReference] float thrustRate = 1000f;
     [SerializeReference] float rotationRate = 20f;
@@ -20,6 +21,9 @@ public class Movement : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
 
         Debug.Log("got the rigid body at startup...");
+        if (audioSource == null) {
+            Debug.Log("COULD NOT GET AUDIO SOURCE!!!");
+        }
     }
 
     // Update is called once per frame
@@ -42,6 +46,11 @@ public class Movement : MonoBehaviour
     }
 
     void AdjustSound(bool thrusting) {
+        if (audioSource == null) {
+            Debug.Log("OOPS NO AUDIO SOURCE TO ADJUST");
+            return;
+        }
+
         if (thrusting) {
             if (!audioSource.isPlaying) {
                 audioSource.Play();
@@ -49,14 +58,14 @@ public class Movement : MonoBehaviour
         } else if (audioSource.isPlaying) {
             audioSource.Pause();
         }
-    }
+    } 
 
     bool AdjustForFuel() {
         bool hasRemainingFuel = true;
 
         Vector3 scale = transform.localScale;
         float newY = scale.y;
-        newY -= 0.001f;
+        newY -= fuelBurnRate;
         if (newY > 0.25f) {
             Vector3 newScale = new Vector3(scale.x, newY, scale.z);
             transform.localScale = newScale;
